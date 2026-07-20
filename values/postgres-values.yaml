@@ -27,9 +27,13 @@ primary:
   podSecurityContext:
     enabled: true
     fsGroup: 1001
+    fsGroupChangePolicy: Always
 
   containerSecurityContext:
     enabled: true
+    runAsUser: 1001
+    runAsGroup: 1001
+    runAsNonRoot: true
     allowPrivilegeEscalation: false
     capabilities:
       drop:
@@ -37,6 +41,8 @@ primary:
 
 volumePermissions:
   enabled: true
+  containerSecurityContext:
+    runAsUser: 0
 
 metrics:
   enabled: false
