@@ -26,6 +26,7 @@ primary:
 
   podSecurityContext:
     enabled: true
+    fsGroup: 1001
 
   containerSecurityContext:
     enabled: true
@@ -33,6 +34,9 @@ primary:
     capabilities:
       drop:
         - ALL
+
+volumePermissions:
+  enabled: true
 
 metrics:
   enabled: false
