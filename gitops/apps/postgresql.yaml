@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qvs-postgresql
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  sources:
+    - repoURL: https://charts.bitnami.com/bitnami
+      chart: postgresql
+      targetRevision: 18.8.0
+      helm:
+        releaseName: qoves-postgresql
+        valueFiles:
+          - $values/values/postgres-values.yaml
+
+    - repoURL: https://github.com/eferoghenej/qvs.git
+      targetRevision: HEAD
+      ref: values
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qvs-app
+
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
