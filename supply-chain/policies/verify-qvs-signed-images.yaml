@@ -1,0 +1,41 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-qvs-signed-images
+  annotations:
+    policies.kyverno.io/title: Verify QVS Signed Images
+    policies.kyverno.io/category: Software Supply Chain Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/description: >-
+      Only images from the qvs-signed-demo repository which have been
+      signed by the trusted Cosign key may run in qvs-app.
+spec:
+  validationFailureAction: Enforce
+  background: false
+
+  rules:
+    - name: verify-cosign-signature
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - qvs-app
+
+      verifyImages:
+        - imageReferences:
+            - "ghcr.io/eferoghenej/qvs-signed-demo:*"
+
+          mutateDigest: true
+          verifyDigest: true
+          required: true
+
+          attestors:
+            - entries:
+                - keys:
+                    publicKeys: |-
+                      -----BEGIN PUBLIC KEY-----
+                      MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEutShpCCuTsoS4qgmARu7sXy4twGd
+                      yndEHHwM5Z1jrcRtXImyquP1kaJBqO20EKKaT7bsjPlCSgofbFgJ/QVa6Q==
+                      -----END PUBLIC KEY-----
