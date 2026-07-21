@@ -45,4 +45,18 @@ volumePermissions:
     runAsUser: 0
 
 metrics:
-  enabled: false
+  enabled: true
+
+  image:
+    registry: registry-1.docker.io
+    repository: bitnami/postgres-exporter
+    tag: ""
+    digest: "sha256:53ab72a1b940d7637e91619f1000da9ebef14bc7dad74321a78731d65c79f55b"
+
+  service:
+    ports:
+      metrics: 9187
+
+  serviceMonitor:
+    enabled: true
+    namespace: qvs-app
