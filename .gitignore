@@ -5,3 +5,4 @@ backups/*
 !backups/.gitkeep
 # Cosign private signing material
 supply-chain/keys/cosign.key
+ss-key-backup.yaml
