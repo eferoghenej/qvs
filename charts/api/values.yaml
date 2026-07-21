@@ -78,6 +78,17 @@ autoscaling:
   maxReplicas: 5
   targetCPUUtilizationPercentage: 70
 
+# Observability (H). Both objects are auto-discovered by the kube-prometheus-stack
+# Prometheus (its selectors match all ServiceMonitors/PrometheusRules).
+serviceMonitor:
+  enabled: true
+  interval: 30s
+
+prometheusRule:
+  enabled: true
+  # Fire when >10% of responses are 5xx over 5m (i.e. /healthz failing).
+  errorRateThreshold: 0.1
+
 ingress:
   enabled: true
   className: nginx
