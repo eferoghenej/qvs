@@ -1,8 +1,10 @@
 replicaCount: 2
 
 image:
-  repository: placeholder
-  tag: placeholder
+  repository: qvs-api
+  # Pinned tag (never :latest). Built locally into minikube's Docker daemon,
+  # so IfNotPresent avoids a registry pull.
+  tag: "0.1.0"
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -33,8 +35,17 @@ service:
 containerPort: 8080
 
 database:
-  secretName: api-database
-  secretKey: DATABASE_URL
+  # Non-secret connection parameters live here; the password is pulled from
+  # the existing Sealed Secret at runtime and interpolated into DATABASE_URL,
+  # so no credential is ever committed to git.
+  host: qoves-postgresql.qvs-app.svc.cluster.local
+  port: 5432
+  name: qvs
+  user: qvs
+  sslmode: disable
+  passwordSecret:
+    name: qvs-postgresql-credentials
+    key: password
 
 probes:
   readiness:

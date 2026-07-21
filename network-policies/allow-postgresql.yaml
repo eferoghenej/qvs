@@ -1,3 +1,5 @@
+# Ingress half for: API -> PostgreSQL (see allow-db-egress.yaml for the egress
+# half). Restricted to the API pods only, not any pod in the namespace.
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -12,7 +14,9 @@ spec:
     - Ingress
   ingress:
     - from:
-        - podSelector: {}
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: api
       ports:
         - protocol: TCP
           port: 5432

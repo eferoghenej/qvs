@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qvs-api
+  namespace: argocd
+  annotations:
+    # Sync after the DB (-1), the Sealed Secret (-2) and the NetworkPolicies (0)
+    # so the pod finds its credential and can reach Postgres on first start.
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    repoURL: https://github.com/eferoghenej/qvs.git
+    targetRevision: HEAD
+    path: charts/api
+    helm:
+      releaseName: qvs-api
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: qvs-app
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

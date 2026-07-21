@@ -45,11 +45,16 @@ spec:
               protocol: TCP
 
           env:
-            - name: DATABASE_URL
+            # Pull only the password from the Secret, then assemble the full
+            # connection string via $(VAR) interpolation. Kubernetes expands
+            # $(DB_PASSWORD) because it is declared earlier in this list.
+            - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: {{ .Values.database.secretName }}
-                  key: {{ .Values.database.secretKey }}
+                  name: {{ .Values.database.passwordSecret.name }}
+                  key: {{ .Values.database.passwordSecret.key }}
+            - name: DATABASE_URL
+              value: "postgresql://{{ .Values.database.user }}:$(DB_PASSWORD)@{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}?sslmode={{ .Values.database.sslmode }}"
 
           readinessProbe:
             httpGet:

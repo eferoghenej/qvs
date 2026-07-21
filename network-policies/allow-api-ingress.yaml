@@ -1,0 +1,22 @@
+# Ingress half for: ingress-controller -> API.
+# The nginx controller lives in the ingress-nginx namespace (outside the
+# default-deny namespace), so only this ingress allow on the API is needed.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-ingress
+  namespace: qvs-app
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: api
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx
+      ports:
+        - protocol: TCP
+          port: 8080

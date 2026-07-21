@@ -1,0 +1,44 @@
+# Ingress half for: Prometheus -> scrape targets.
+# Prometheus runs in the monitoring namespace (outside default-deny), so only
+# ingress allows on the scraped pods are needed. Two targets: the PostgreSQL
+# exporter sidecar (9187) and the API's /metrics (8080).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-postgresql-metrics-ingress
+  namespace: qvs-app
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/instance: qoves-postgresql
+      app.kubernetes.io/name: postgresql
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 9187
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-metrics-ingress
+  namespace: qvs-app
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: api
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - protocol: TCP
+          port: 8080

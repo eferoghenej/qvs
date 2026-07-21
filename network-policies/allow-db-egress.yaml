@@ -1,0 +1,23 @@
+# Egress half for: API -> PostgreSQL.
+# Both pods live inside qvs-app, so this flow needs BOTH halves: this egress
+# rule on the API and the matching ingress rule in allow-postgresql.yaml.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-db-egress
+  namespace: qvs-app
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: api
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/instance: qoves-postgresql
+              app.kubernetes.io/name: postgresql
+      ports:
+        - protocol: TCP
+          port: 5432
