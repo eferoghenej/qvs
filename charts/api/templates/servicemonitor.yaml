@@ -1,0 +1,20 @@
+{{- if .Values.serviceMonitor.enabled }}
+# Tells the Prometheus operator to scrape the API's /metrics. The stack's
+# Prometheus selects all ServiceMonitors (serviceMonitorSelectorNilUsesHelmValues
+# is false), so no extra release label is needed. NetworkPolicy allow-api-metrics
+# -ingress permits monitoring -> :8080 under default-deny.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "api.fullname" . }}
+  labels:
+    {{- include "api.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "api.selectorLabels" . | nindent 6 }}
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: {{ .Values.serviceMonitor.interval }}
+{{- end }}

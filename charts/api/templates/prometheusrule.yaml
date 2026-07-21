@@ -1,0 +1,34 @@
+{{- if .Values.prometheusRule.enabled }}
+# One meaningful alert. /healthz returns 503 when the API cannot reach Postgres,
+# and the readiness/liveness probes hit /healthz continuously — so even with no
+# user traffic the 5xx counter reflects DB health. A sustained 5xx ratio is the
+# "service is down for users" signal, and it is actionable (check DB pod, PVC,
+# NetworkPolicies). When idle with zero requests the ratio is NaN, so it will not
+# false-fire.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "api.fullname" . }}
+  labels:
+    {{- include "api.labels" . | nindent 4 }}
+spec:
+  groups:
+    - name: qvs-api
+      rules:
+        - alert: APIHealthzErrorRate
+          expr: >-
+            sum(rate(http_requests_total{namespace="{{ .Release.Namespace }}",status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{namespace="{{ .Release.Namespace }}"}[5m]))
+            > {{ .Values.prometheusRule.errorRateThreshold }}
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "qvs-api elevated 5xx rate (likely database unreachable)"
+            description: >-
+              The 5xx response rate for qvs-api has exceeded its threshold over
+              the last 5 minutes. /healthz returns 503 when SELECT 1 against
+              PostgreSQL fails, so this usually means the DB is unreachable.
+              Check the postgres pod, its PVC, and the qvs-app NetworkPolicies.
+{{- end }}
