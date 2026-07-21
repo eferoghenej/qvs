@@ -3,3 +3,5 @@
 backups/
 backups/*
 !backups/.gitkeep
+# Cosign private signing material
+supply-chain/keys/cosign.key
